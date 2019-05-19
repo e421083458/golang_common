@@ -17,7 +17,8 @@ A Quick start, Lightweight, Golang Public Class Library
 ```
 go get -v github.com/e421083458/golang_common
 ```
-2. 将配置文件拷贝到你的项目中，配置文件请参考：https://github.com/e421083458/golang_common/tree/master/conf/dev
+2. 将配置文件拷贝到你的项目中，配置文件请参考：
+https://github.com/e421083458/golang_common/tree/master/conf/dev
 
 3. 引入到你的项目：
 ```
