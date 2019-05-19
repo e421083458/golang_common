@@ -3,7 +3,9 @@ A Quick start, Lightweight, Golang Public Class Library
 
 ## 功能定位
 配置 Golang 基础服务（mysql、redis、http.client、log）比较繁琐，如果想 **快速接入** 基础服务可以使用本类库。
+
 没有多余复杂的功能，方便你拓展其他功能。
+
 你可以 import 引用使用，也可以拷贝代码到自己项目中使用。
 
 ## 功能
