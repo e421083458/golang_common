@@ -1,0 +1,4 @@
+# This is base config
+
+debug_mode="debug"              #debug模式
+time_location="Asia/Chongqing"  #time_location

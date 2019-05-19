@@ -1,0 +1,17 @@
+{
+    "LogLevel" : "trace",
+
+    "FileWriter" : {
+        "On": true,
+
+        "LogPath" : "./demo.log.info",
+        "RotateLogPath" : "./demo.log.info-%Y%M%D%H",
+
+        "WfLogPath" : "./demo.log.wf",
+        "RotateWfLogPath" : "./demo.log.wf-%Y%M%D%H"
+    },
+
+    "ConsoleWriter" : {
+        "On" : false
+    }
+}

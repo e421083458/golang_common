@@ -1,0 +1,16 @@
+# This is profile config
+
+server_addr = ":8031"             #server地址
+read_timeout = 10                 #server读超时时间
+write_timeout = 10                #server写超时时间
+max_header_bytes = 20             #最大header头长度
+allow_host = [                    #白名单ip
+    "127.0.0.1",
+    "10.89.236.25",
+    "10.89.234.61",
+    "10.89.235.12",
+    "100.90.164.31",
+    "172.25.32.135",
+    "100.90.163.52",
+    "172.25.32.135"
+]
