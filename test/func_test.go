@@ -39,7 +39,7 @@ func Test_GetConfEnv(t *testing.T) {
 func Test_ParseLocalConfig(t *testing.T) {
 	InitTest()
 	httpProfile := &HttpConf{}
-	err:=lib.ParseLocalConfig("http.toml",httpProfile)
+	err:=lib.ParseLocalConfig("test.toml",httpProfile)
 	if err!=nil{
 		t.Fatal(err)
 	}
