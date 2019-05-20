@@ -14,7 +14,7 @@ type BaseConf struct {
 
 type LogConfFileWriter struct {
 	On              bool   `toml:"on"`
-	LogPath         string `toml:"log_pathLogPath"`
+	LogPath         string `toml:"log_path"`
 	RotateLogPath   string `toml:"rotate_log_path"`
 	WfLogPath       string `toml:"wf_log_path"`
 	RotateWfLogPath string `toml:"rotate_wf_path"`
