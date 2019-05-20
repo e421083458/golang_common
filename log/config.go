@@ -25,7 +25,7 @@ type LogConfig struct {
 	CW    ConfConsoleWriter `toml:"ConsoleWriter"`
 }
 
-func SetupLogInstanceWithConf(lc LogConfig,logger *Logger) (err error) {
+func SetupLogInstanceWithConf(lc LogConfig, logger *Logger) (err error) {
 	if lc.FW.On {
 		if len(lc.FW.LogPath) > 0 {
 			w := NewFileWriter()
@@ -80,7 +80,7 @@ func SetupLogInstanceWithConf(lc LogConfig,logger *Logger) (err error) {
 	return
 }
 
-func SetupLogInstanceWithFile(file string,logger *Logger) (err error) {
+func SetupLogInstanceWithFile(file string, logger *Logger) (err error) {
 	var lc LogConfig
 	cnt, err := ioutil.ReadFile(file)
 	if _, err := toml.Decode(string(cnt), &lc); err != nil {

@@ -1,8 +1,9 @@
-package lib
+package test
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/e421083458/golang_common/lib"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -30,7 +31,7 @@ type HttpConf struct {
 //获取 程序运行环境 dev prod
 func Test_GetConfEnv(t *testing.T) {
 	InitTest()
-	fmt.Println(GetConfEnv())
+	fmt.Println(lib.GetConfEnv())
 	DestroyTest()
 }
 
@@ -38,7 +39,7 @@ func Test_GetConfEnv(t *testing.T) {
 func Test_ParseLocalConfig(t *testing.T) {
 	InitTest()
 	httpProfile := &HttpConf{}
-	err:=ParseLocalConfig("http.toml",httpProfile)
+	err:=lib.ParseLocalConfig("http.toml",httpProfile)
 	if err!=nil{
 		t.Fatal(err)
 	}
@@ -46,28 +47,13 @@ func Test_ParseLocalConfig(t *testing.T) {
 	DestroyTest()
 }
 
-//测试服务器解析
-func TestParseServerAddr(t *testing.T) {
-	serverAddr := "10.94.64.101:6379"
-
-	host, port := ParseServerAddr(serverAddr)
-	if host != "10.94.64.101" {
-		t.Fatalf("parse failure, wanted %s, result %s", "10.94.64.101", host)
-	}
-	if port != "6379" {
-		t.Fatalf("parse failure, wanted %s, result %s", "6379", port)
-	}
-
-	fmt.Printf("Host: %s\nPort: %s\n", host, port)
-}
-
 //测试PostJson请求
 func TestJson(t *testing.T) {
 	InitTestServer()
 	//首次scrollsId不传递
 	jsonStr := "{\"source\":\"control\",\"cityId\":\"12\",\"trailNum\":10,\"dayTime\":\"2018-11-21 16:08:00\",\"limit\":2,\"andOperations\":{\"cityId\":\"eq\",\"trailNum\":\"gt\",\"dayTime\":\"eq\"}}"
-	url := "http://"+addr+"/json"
-	_, res, err := HttpJSON(NewTrace(), url, jsonStr, 1000, nil)
+	url := "http://"+addr+"/postjson"
+	_, res, err := lib.HttpJSON(lib.NewTrace(), url, jsonStr, 1000, nil)
 	fmt.Println(string(res))
 	if err != nil {
 		fmt.Println(err.Error())
@@ -81,7 +67,7 @@ func TestGet(t *testing.T) {
 		"city_id": {"12"},
 	}
 	url := "http://"+addr+"/get"
-	_, res, err := HttpGET(NewTrace(), url, a, 1000, nil)
+	_, res, err := lib.HttpGET(lib.NewTrace(), url, a, 1000, nil)
 	fmt.Println("city_id="+string(res))
 	if err != nil {
 		fmt.Println(err.Error())
@@ -95,7 +81,7 @@ func TestPost(t *testing.T) {
 		"city_id": {"12"},
 	}
 	url := "http://"+addr+"/post"
-	_, res, err := HttpPOST(NewTrace(), url, a, 1000, nil, "")
+	_, res, err := lib.HttpPOST(lib.NewTrace(), url, a, 1000, nil, "")
 	fmt.Println("city_id="+string(res))
 	if err != nil {
 		fmt.Println(err.Error())
@@ -105,7 +91,7 @@ func TestPost(t *testing.T) {
 //初始化测试用例
 func InitTest()  {
 	initOnce.Do(func() {
-		if err:=Init("../conf/dev/");err!=nil{
+		if err:=lib.Init("../conf/dev/");err!=nil{
 			log.Fatal(err)
 		}
 	})
