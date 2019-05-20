@@ -17,26 +17,23 @@
 go get -v github.com/e421083458/golang_common
 ```
 2. 将配置文件拷贝到你的项目中，配置文件请参考：https://github.com/e421083458/golang_common/tree/master/conf/dev
+其实只需要base.toml即可，mysql.toml、redis.toml 根据实际需要再配置。
 
-3. 引入到你的项目：
+
+4. log消息打印代码举例：
 ```
 package main
 
 import (
 	"github.com/e421083458/golang_common/lib"
 	"log"
-	"time"
 )
 
-func main(){
-	if err:=lib.Init("./conf/dev/");err!=nil{
+func main() {
+	if err := lib.Init("./"); err != nil {
 		log.Fatal(err)
 	}
-
-	//todo sth
 	lib.Log.TagInfo(lib.NewTrace(), lib.DLTagUndefind, map[string]interface{}{"message": "todo sth"})
-	time.Sleep(time.Second)
-
 	lib.Destroy()
 }
 ```
@@ -49,14 +46,17 @@ go run main.go
 输出：
 
 ```
-2019/05/19 18:55:17 [INFO]  config=./conf/dev/
-2019/05/19 18:55:17 [INFO]  start loading resources.
-2019/05/19 18:55:17 [INFO]  success loading resources.
 ------------------------------------------------------------------------
-2019-05-19T18:55:17.783 [INFO] log.go:58 _undef||message=todo sth||traceid=c0a8fe315ce13615b6c0fc6e104dc7b0||cspanid=||spanid=9c49c824380704bb
-2019/05/19 18:55:18 [INFO]  start destroy resources.
+2019/05/20 23:42:02 [INFO]  config=./
+2019/05/20 23:42:02 [INFO]  start loading resources.
+[ERROR] 2019-05-20 23:42:02 InitRedisConf:Open config ./redis_map.toml fail, open ./redis_map.toml: no such file or directory
+[ERROR] 2019-05-20 23:42:02 InitDBPool:Open config ./mysql_map.toml fail, open ./mysql_map.toml: no such file or directory
+2019/05/20 23:42:02 [INFO]  success loading resources.
 ------------------------------------------------------------------------
-2019/05/19 18:55:18 [INFO]  success destroy resources.
+2019/05/20 23:42:02 [INFO]  start destroy resources.
+------------------------------------------------------------------------
+2019-05-20T23:42:02.879 [INFO] log.go:58 _undef||message=todo sth||traceid=c0a803185ce2caca4de88663658221b0||cspanid=||spanid=9c4ac9d278629a0f
+2019/05/20 23:42:02 [INFO]  success destroy resources.
 ```
 
 ## 其他功能举例
