@@ -1,4 +1,4 @@
-package xlog4go
+package log
 
 import (
 	"fmt"
@@ -12,7 +12,6 @@ import (
 
 var (
 	LEVEL_FLAGS = [...]string{"TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"}
-	recordPool  *sync.Pool
 )
 
 const (
@@ -59,6 +58,7 @@ type Logger struct {
 	lastTimeStr string
 	c           chan bool
 	layout      string
+	recordPool  *sync.Pool
 }
 
 func NewLogger() *Logger {
@@ -66,14 +66,15 @@ func NewLogger() *Logger {
 		takeup = true
 		return logger_default
 	}
-
 	l := new(Logger)
-	l.writers = make([]Writer, 0, 2)
+	l.writers = []Writer{}
 	l.tunnel = make(chan *Record, tunnel_size_default)
-	l.c = make(chan bool, 1)
+	l.c = make(chan bool, 2)
 	l.level = DEBUG
 	l.layout = "2006/01/02 15:04:05"
-
+	l.recordPool = &sync.Pool{New: func() interface{} {
+		return &Record{}
+	}}
 	go boostrapLogWriter(l)
 
 	return l
@@ -156,7 +157,7 @@ func (l *Logger) deliverRecordToWriter(level int, format string, args ...interfa
 		l.lastTime = now.Unix()
 		l.lastTimeStr = now.Format(l.layout)
 	}
-	r := recordPool.Get().(*Record)
+	r := l.recordPool.Get().(*Record)
 	r.info = inf
 	r.code = code
 	r.time = l.lastTimeStr
@@ -196,14 +197,13 @@ func boostrapLogWriter(logger *Logger) {
 				logger.c <- true
 				return
 			}
-
 			for _, w := range logger.writers {
 				if err := w.Write(r); err != nil {
 					log.Println(err)
 				}
 			}
 
-			recordPool.Put(r)
+			logger.recordPool.Put(r)
 
 		case <-flushTimer.C:
 			for _, w := range logger.writers {
@@ -228,55 +228,64 @@ func boostrapLogWriter(logger *Logger) {
 	}
 }
 
-// default
+// default logger
 var (
 	logger_default *Logger
 	takeup         = false
 )
 
 func SetLevel(lvl int) {
+	defaultLoggerInit()
 	logger_default.level = lvl
 }
 
 func SetLayout(layout string) {
+	defaultLoggerInit()
 	logger_default.layout = layout
 }
 
 func Trace(fmt string, args ...interface{}) {
+	defaultLoggerInit()
 	logger_default.deliverRecordToWriter(TRACE, fmt, args...)
 }
 
 func Debug(fmt string, args ...interface{}) {
+	defaultLoggerInit()
 	logger_default.deliverRecordToWriter(DEBUG, fmt, args...)
 }
 
 func Warn(fmt string, args ...interface{}) {
+	defaultLoggerInit()
 	logger_default.deliverRecordToWriter(WARNING, fmt, args...)
 }
 
 func Info(fmt string, args ...interface{}) {
+	defaultLoggerInit()
 	logger_default.deliverRecordToWriter(INFO, fmt, args...)
 }
 
 func Error(fmt string, args ...interface{}) {
+	defaultLoggerInit()
 	logger_default.deliverRecordToWriter(ERROR, fmt, args...)
 }
 
 func Fatal(fmt string, args ...interface{}) {
+	defaultLoggerInit()
 	logger_default.deliverRecordToWriter(FATAL, fmt, args...)
 }
 
 func Register(w Writer) {
+	defaultLoggerInit()
 	logger_default.Register(w)
 }
 
 func Close() {
+	defaultLoggerInit()
 	logger_default.Close()
 }
 
-func init() {
-	logger_default = NewLogger()
-	recordPool = &sync.Pool{New: func() interface{} {
-		return &Record{}
-	}}
+func defaultLoggerInit() {
+	if takeup==false{
+		logger_default = NewLogger()
+	}
 }

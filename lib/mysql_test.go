@@ -1,7 +1,7 @@
 package lib
 
 import (
-	"github.com/jinzhu/gorm"
+	"github.com/e421083458/gorm"
 	"testing"
 	"fmt"
 	"time"
@@ -109,21 +109,31 @@ func Test_GORM(t *testing.T)  {
 		t.Fatal(err)
 	}
 	db:=dbpool.Begin()
+	traceCtx:=NewTrace()
+
+	//设置trace信息
+	db = db.SetCtx(traceCtx)
 	if err:=db.Exec(createTableSQL).Error;err!=nil{
 		db.Rollback()
 		t.Fatal(err)
 	}
+
+	//插入数据
 	t1:= &Test1{Name:"test_name",CreatedAt:time.Now()}
 	if err:=db.Save(t1).Error;err!=nil{
 		db.Rollback()
 		t.Fatal(err)
 	}
+
+	//查询数据
 	list:=[]Test1{}
 	if err:=db.Where("name=?","test_name").Find(&list).Error;err!=nil{
 		db.Rollback()
 		t.Fatal(err)
 	}
 	fmt.Println(list)
+
+	//删除表数据
 	if err:=db.Exec(dropTableSQL).Error;err!=nil{
 		db.Rollback()
 		t.Fatal(err)

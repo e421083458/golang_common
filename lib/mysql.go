@@ -5,8 +5,8 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/e421083458/gorm"
+	_ "github.com/e421083458/gorm/dialects/mysql"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -28,17 +28,13 @@ func InitDBPool(path string) error {
 	DBMapPool = map[string]*sql.DB{}
 	GORMMapPool = map[string]*gorm.DB{}
 	for confName, DbConf := range DbConfMap.List {
-		//fmt.Println(DbConf)
 		dbpool, err := sql.Open("mysql", DbConf.DataSourceName)
 		if err != nil {
 			return err
 		}
-		// set DB pool max connection num and max idle connection num
 		dbpool.SetMaxOpenConns(DbConf.MaxOpenConn)
 		dbpool.SetMaxIdleConns(DbConf.MaxIdleConn)
-		// set DB connection max life time
 		dbpool.SetConnMaxLifetime(time.Duration(DbConf.MaxConnLifeTime) * time.Second)
-		// ping the db server
 		err = dbpool.Ping()
 		if err != nil {
 			return err
@@ -55,6 +51,7 @@ func InitDBPool(path string) error {
 			return err
 		}
 		dbgorm.LogMode(true)
+		dbgorm.LogCtx(true)
 		dbgorm.SetLogger(&MysqlGormLogger{Trace: NewTrace()})
 		dbgorm.DB().SetMaxIdleConns(DbConf.MaxIdleConn)
 		dbgorm.DB().SetMaxOpenConns(DbConf.MaxOpenConn)
@@ -131,6 +128,21 @@ func (logger *MysqlGormLogger) Print(values ...interface{}) {
 		Log.TagInfo(logger.Trace, "_com_mysql_success", message)
 	} else {
 		Log.TagInfo(logger.Trace, "_com_mysql_failure", message)
+	}
+}
+
+// LogCtx(true) 时会执行改方法
+func (logger *MysqlGormLogger) CtxPrint(s *gorm.DB,values ...interface{}) {
+	ctx,ok:=s.GetCtx()
+	trace:=NewTrace()
+	if ok{
+		trace=ctx.(*TraceContext)
+	}
+	message := logger.LogFormatter(values...)
+	if message["level"] == "sql" {
+		Log.TagInfo(trace, "_com_mysql_success", message)
+	} else {
+		Log.TagInfo(trace, "_com_mysql_failure", message)
 	}
 }
 

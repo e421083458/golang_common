@@ -6,10 +6,10 @@ import (
 )
 
 //测试日志打点
-func TestInitLog(t *testing.T) {
+func TestDefaultLog(t *testing.T) {
 	InitTest()
 	Log.TagInfo(NewTrace(), DLTagMySqlSuccess, map[string]interface{}{
-		"sql": "dltag",
+		"sql": "sql",
 	})
 	time.Sleep(time.Second)
 	DestroyTest()

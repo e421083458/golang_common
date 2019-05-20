@@ -1,4 +1,4 @@
-package xlog4go
+package log
 
 import (
 	"fmt"

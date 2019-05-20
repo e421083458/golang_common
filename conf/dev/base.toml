@@ -2,3 +2,15 @@
 
 debug_mode="debug"              #debug模式
 time_location="Asia/Chongqing"  #time_location
+
+[log]
+    log_level = "trace"         #日志打印最低级别
+    [log.file_writer]           #文件写入配置
+        on = true
+        log_path = "./golang_common.inf.log"
+        rotate_log_path = "./golang_common.inf.log"
+        wf_log_path = "./golang_common.wf.log"
+        rotate_wf_log_path = "./golang_common.wf.log"
+    [log.console_writer]        #工作台输出
+        on = true
+        color = true

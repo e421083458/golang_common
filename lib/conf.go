@@ -2,13 +2,33 @@ package lib
 
 import (
 	"database/sql"
-	dlog "github.com/e421083458/golang_common/xlog4go"
-	"github.com/jinzhu/gorm"
+	dlog "github.com/e421083458/golang_common/log"
+	"github.com/e421083458/gorm"
 )
 
 type BaseConf struct {
-	DebugMode      string   `toml:"debug_mode"`
-	TimeLocation   string   `toml:"time_location"`
+	DebugMode    string    `toml:"debug_mode"`
+	TimeLocation string    `toml:"time_location"`
+	Log          LogConfig `toml:"log"`
+}
+
+type LogConfFileWriter struct {
+	On              bool   `toml:"on"`
+	LogPath         string `toml:"log_pathLogPath"`
+	RotateLogPath   string `toml:"rotate_log_path"`
+	WfLogPath       string `toml:"wf_log_path"`
+	RotateWfLogPath string `toml:"rotate_wf_path"`
+}
+
+type LogConfConsoleWriter struct {
+	On    bool `toml:"on"`
+	Color bool `toml:"color"`
+}
+
+type LogConfig struct {
+	Level string               `toml:"log_level"`
+	FW    LogConfFileWriter    `toml:"file_writer"`
+	CW    LogConfConsoleWriter `toml:"console_writer"`
 }
 
 type MysqlMapConf struct {
@@ -54,11 +74,30 @@ func InitBaseConf(path string) error {
 	if err != nil {
 		return err
 	}
+	//配置日志
+	logConf := dlog.LogConfig{
+		Level: ConfBase.Log.Level,
+		FW: dlog.ConfFileWriter{
+			On:              ConfBase.Log.FW.On,
+			LogPath:         ConfBase.Log.FW.LogPath,
+			RotateLogPath:   ConfBase.Log.FW.RotateLogPath,
+			WfLogPath:       ConfBase.Log.FW.WfLogPath,
+			RotateWfLogPath: ConfBase.Log.FW.RotateWfLogPath,
+		},
+		CW: dlog.ConfConsoleWriter{
+			On:    ConfBase.Log.CW.On,
+			Color: ConfBase.Log.CW.Color,
+		},
+	}
+	if err := dlog.SetupDefaultLogWithConf(logConf); err != nil {
+		panic(err)
+	}
+	dlog.SetLayout("2006-01-02T15:04:05.000")
 	return nil
 }
 
 func InitLogger(path string) error {
-	if err := dlog.SetupLogWithConf(path); err != nil {
+	if err := dlog.SetupDefaultLogWithFile(path); err != nil {
 		panic(err)
 	}
 	dlog.SetLayout("2006-01-02T15:04:05.000")

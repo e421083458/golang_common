@@ -1,4 +1,4 @@
-package xlog4go
+package log
 
 import (
 	"errors"
@@ -25,15 +25,7 @@ type LogConfig struct {
 	CW    ConfConsoleWriter `toml:"ConsoleWriter"`
 }
 
-func SetupLogWithConf(file string) (err error) {
-	var lc LogConfig
-	cnt, err := ioutil.ReadFile(file)
-
-	//var conf Config
-	if _, err := toml.Decode(string(cnt), &lc); err != nil {
-		return err
-	}
-
+func SetupLogInstanceWithConf(lc LogConfig,logger *Logger) (err error) {
 	if lc.FW.On {
 		if len(lc.FW.LogPath) > 0 {
 			w := NewFileWriter()
@@ -45,7 +37,7 @@ func SetupLogWithConf(file string) (err error) {
 			} else {
 				w.SetLogLevelCeil(ERROR)
 			}
-			Register(w)
+			logger.Register(w)
 		}
 
 		if len(lc.FW.WfLogPath) > 0 {
@@ -54,37 +46,55 @@ func SetupLogWithConf(file string) (err error) {
 			wfw.SetPathPattern(lc.FW.RotateWfLogPath)
 			wfw.SetLogLevelFloor(WARNING)
 			wfw.SetLogLevelCeil(ERROR)
-			Register(wfw)
+			logger.Register(wfw)
 		}
 	}
 
 	if lc.CW.On {
 		w := NewConsoleWriter()
 		w.SetColor(lc.CW.Color)
-		Register(w)
+		logger.Register(w)
 	}
-
 	switch lc.Level {
 	case "trace":
-		SetLevel(TRACE)
+		logger.SetLevel(TRACE)
 
 	case "debug":
-		SetLevel(DEBUG)
+		logger.SetLevel(DEBUG)
 
 	case "info":
-		SetLevel(INFO)
+		logger.SetLevel(INFO)
 
 	case "warning":
-		SetLevel(WARNING)
+		logger.SetLevel(WARNING)
 
 	case "error":
-		SetLevel(ERROR)
+		logger.SetLevel(ERROR)
 
 	case "fatal":
-		SetLevel(FATAL)
+		logger.SetLevel(FATAL)
 
 	default:
 		err = errors.New("Invalid log level")
 	}
 	return
+}
+
+func SetupLogInstanceWithFile(file string,logger *Logger) (err error) {
+	var lc LogConfig
+	cnt, err := ioutil.ReadFile(file)
+	if _, err := toml.Decode(string(cnt), &lc); err != nil {
+		return err
+	}
+	return SetupLogInstanceWithConf(lc, logger)
+}
+
+func SetupDefaultLogWithFile(file string) (err error) {
+	defaultLoggerInit()
+	return SetupLogInstanceWithFile(file, logger_default)
+}
+
+func SetupDefaultLogWithConf(lc LogConfig) (err error) {
+	defaultLoggerInit()
+	return SetupLogInstanceWithConf(lc, logger_default)
 }

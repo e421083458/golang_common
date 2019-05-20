@@ -7,7 +7,7 @@ import (
 	"encoding/hex"
 	"flag"
 	"fmt"
-	dlog "github.com/e421083458/golang_common/xlog4go"
+	dlog "github.com/e421083458/golang_common/log"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -27,8 +27,8 @@ var LocalIP = net.ParseIP("127.0.0.1")
 //公共初始化函数：支持两种方式设置配置文件
 //
 //使用逻辑：
-//可以使用命令行 	   -config conf/dev/
-//也可以使用函数传入 Init("conf/dev/")  优先使用
+//函数传入配置文件 Init("./conf/dev/")
+//如果配置文件为空，会从命令行中读取 	  -config conf/dev/
 func Init(configPath string) error {
 	var conf *string
 	if len(configPath) > 0 {
@@ -54,11 +54,6 @@ func Init(configPath string) error {
 
 	// 解析配置文件目录
 	if err := ParseConfPath(*conf); err != nil {
-		return err
-	}
-
-	// 加载日志配置并初始化
-	if err := InitLogger(GetConfPath("logger")); err != nil {
 		return err
 	}
 

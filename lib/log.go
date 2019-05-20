@@ -2,7 +2,7 @@ package lib
 
 import (
 	"fmt"
-	dlog "github.com/e421083458/golang_common/xlog4go"
+	dlog "github.com/e421083458/golang_common/log"
 	"strings"
 )
 
