@@ -42,7 +42,7 @@ func Init(configPath string) error {
 		os.Exit(1)
 	}
 
-	fmt.Println("------------------------------------------------------------------------")
+	log.Println("------------------------------------------------------------------------")
 	log.Printf("[INFO]  config=%s\n", *conf)
 	log.Printf("[INFO] %s\n", " start loading resources.")
 
@@ -80,13 +80,13 @@ func Init(configPath string) error {
 	}
 
 	log.Printf("[INFO] %s\n", " success loading resources.")
-	fmt.Println("------------------------------------------------------------------------")
+	log.Println("------------------------------------------------------------------------")
 	return nil
 }
 
 //公共销毁函数
 func Destroy() {
-	fmt.Println("------------------------------------------------------------------------")
+	log.Println("------------------------------------------------------------------------")
 	log.Printf("[INFO] %s\n", " start destroy resources.")
 	CloseDB()
 	dlog.Close()

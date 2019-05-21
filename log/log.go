@@ -63,7 +63,7 @@ type Logger struct {
 
 func NewLogger() *Logger {
 	if logger_default != nil && takeup == false {
-		takeup = true
+		takeup = true	//默认启动标志
 		return logger_default
 	}
 	l := new(Logger)
@@ -122,7 +122,6 @@ func (l *Logger) Fatal(fmt string, args ...interface{}) {
 func (l *Logger) Close() {
 	close(l.tunnel)
 	<-l.c
-
 	for _, w := range l.writers {
 		if f, ok := w.(Flusher); ok {
 			if err := f.Flush(); err != nil {
@@ -282,6 +281,8 @@ func Register(w Writer) {
 func Close() {
 	defaultLoggerInit()
 	logger_default.Close()
+	logger_default = nil
+	takeup = false
 }
 
 func defaultLoggerInit() {

@@ -2,15 +2,14 @@
 ## 定位
 配置 Golang 基础服务（mysql、redis、http.client、log）比较繁琐，如果想 **快速接入** 基础服务可以使用本类库。
 没有多余复杂的功能，方便你拓展其他功能。
-你可以 import 引用使用，也可以拷贝代码到自己项目中使用。
+你可以 import 引入直接使用，也可以拷贝代码到自己项目中使用，也可以用于构建自己的基础类库。
 项目地址：https://github.com/e421083458/golang_common
 
 ## 功能
  1. 多套配置环境设置，比如：dev、prod。
  2. mysql、redis 多套数据源配置。
- 3. 支持多个自定义日志实例，自动滚动切分日志。
- 4. 支持 mysql(gorm)、redis(redigo)、http.client 请求链路日志输出。
- 5. 支持多个自定义日志实例。
+ 3. 支持默认和自定义日志实例，自动滚动日志。
+ 4. 支持 mysql(基于gorm的二次开发支持ctx功能，不影响gorm原功能使用)、redis(redigo)、http.client 请求链路日志输出。
 ## 安装及使用
  1. 需要确保已经安装了 Go 1.8+，然后执行以下命令
 ```
@@ -27,14 +26,18 @@ package main
 import (
 	"github.com/e421083458/golang_common/lib"
 	"log"
+	"time"
 )
 
-func main() {
-	if err := lib.Init("./"); err != nil {
+func main(){
+	if err:=lib.Init("./conf/dev/");err!=nil{
 		log.Fatal(err)
 	}
+	defer lib.Destroy()
+
+	//todo sth
 	lib.Log.TagInfo(lib.NewTrace(), lib.DLTagUndefind, map[string]interface{}{"message": "todo sth"})
-	lib.Destroy()
+	time.Sleep(time.Second)
 }
 ```
 4. 运行代码
@@ -46,17 +49,15 @@ go run main.go
 输出：
 
 ```
-------------------------------------------------------------------------
-2019/05/20 23:42:02 [INFO]  config=./
-2019/05/20 23:42:02 [INFO]  start loading resources.
-[ERROR] 2019-05-20 23:42:02 InitRedisConf:Open config ./redis_map.toml fail, open ./redis_map.toml: no such file or directory
-[ERROR] 2019-05-20 23:42:02 InitDBPool:Open config ./mysql_map.toml fail, open ./mysql_map.toml: no such file or directory
-2019/05/20 23:42:02 [INFO]  success loading resources.
-------------------------------------------------------------------------
-2019/05/20 23:42:02 [INFO]  start destroy resources.
-------------------------------------------------------------------------
-2019-05-20T23:42:02.879 [INFO] log.go:58 _undef||message=todo sth||traceid=c0a803185ce2caca4de88663658221b0||cspanid=||spanid=9c4ac9d278629a0f
-2019/05/20 23:42:02 [INFO]  success destroy resources.
+2019/05/21 10:31:08 ------------------------------------------------------------------------
+2019/05/21 10:31:08 [INFO]  config=./conf/dev/
+2019/05/21 10:31:08 [INFO]  start loading resources.
+2019/05/21 10:31:08 [INFO]  success loading resources.
+2019/05/21 10:31:08 ------------------------------------------------------------------------
+2019-05-21T10:31:08.667 [INFO] log.go:58 _undef||traceid=ac182a1c5ce362ecf9280618104dc7b0||cspanid=||spanid=f0fb48f0380704bb||message=todo sth
+2019/05/21 10:31:09 ------------------------------------------------------------------------
+2019/05/21 10:31:09 [INFO]  start destroy resources.
+2019/05/21 10:31:09 [INFO]  success destroy resources.
 ```
 
 ## 其他功能举例
@@ -367,4 +368,16 @@ func DestroyTest()  {
 	Destroy()
 }
 ```
+## 思考
+**怎么样才能让类库做的更通用？**
+有人说简洁才是golang特性，不需要做通用类库。如果你想加一个功能直接引一个包用即可。比如：日志那就引日志包、redis就引redis包。
+
+我赞同此观点，但是引入包后要面临的问题是功能改造和代码适配，并且每做一个项目都要搞上一套。这意味着需要耗费一定的时间在重复的工作上。
+
+我感觉类库应该有一下特点：
+
+ 1. 轻量级，没有太多依赖，否则容易有类库依赖冲突。
+ 2. 只封装重复使用率高的功能。
+ 3. 拓展性强。
+
 你的 star ，我的动力。有任何关于类库的问题，请提交issue，谢谢。
