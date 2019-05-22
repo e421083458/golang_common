@@ -8,7 +8,7 @@ import (
 )
 
 func Test_Redis(t *testing.T) {
-	InitTest()
+	SetUp()
 	
 	c, err := lib.RedisConnFactory("default")
 	if err != nil {
@@ -29,5 +29,5 @@ func Test_Redis(t *testing.T) {
 		t.Fatal("test redis get fatal!")
 	}
 
-	DestroyTest()
+	TearDown()
 }

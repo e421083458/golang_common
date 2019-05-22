@@ -9,12 +9,12 @@ import (
 
 //测试日志打点
 func TestDefaultLog(t *testing.T) {
-	InitTest()
+	SetUp()
 	lib.Log.TagInfo(lib.NewTrace(), lib.DLTagMySqlSuccess, map[string]interface{}{
 		"sql": "sql",
 	})
 	time.Sleep(time.Second)
-	DestroyTest()
+	TearDown()
 }
 
 //测试日志实例打点

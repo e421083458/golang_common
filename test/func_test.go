@@ -14,11 +14,10 @@ import (
 )
 
 var (
-	addr string = "127.0.0.1:6111"
-	initOnce sync.Once = sync.Once{}
+	addr       string    = "127.0.0.1:6111"
+	initOnce   sync.Once = sync.Once{}
 	serverOnce sync.Once = sync.Once{}
 )
-
 
 type HttpConf struct {
 	ServerAddr     string   `toml:"server_addr"`
@@ -30,21 +29,21 @@ type HttpConf struct {
 
 //获取 程序运行环境 dev prod
 func Test_GetConfEnv(t *testing.T) {
-	InitTest()
+	SetUp()
 	fmt.Println(lib.GetConfEnv())
-	DestroyTest()
+	TearDown()
 }
 
 // 加载自定义配置文件
 func Test_ParseLocalConfig(t *testing.T) {
-	InitTest()
+	SetUp()
 	httpProfile := &HttpConf{}
-	err:=lib.ParseLocalConfig("test.toml",httpProfile)
-	if err!=nil{
+	err := lib.ParseLocalConfig("test.toml", httpProfile)
+	if err != nil {
 		t.Fatal(err)
 	}
 	fmt.Println(httpProfile)
-	DestroyTest()
+	TearDown()
 }
 
 //测试PostJson请求
@@ -52,7 +51,7 @@ func TestJson(t *testing.T) {
 	InitTestServer()
 	//首次scrollsId不传递
 	jsonStr := "{\"source\":\"control\",\"cityId\":\"12\",\"trailNum\":10,\"dayTime\":\"2018-11-21 16:08:00\",\"limit\":2,\"andOperations\":{\"cityId\":\"eq\",\"trailNum\":\"gt\",\"dayTime\":\"eq\"}}"
-	url := "http://"+addr+"/postjson"
+	url := "http://" + addr + "/postjson"
 	_, res, err := lib.HttpJSON(lib.NewTrace(), url, jsonStr, 1000, nil)
 	fmt.Println(string(res))
 	if err != nil {
@@ -66,9 +65,9 @@ func TestGet(t *testing.T) {
 	a := url.Values{
 		"city_id": {"12"},
 	}
-	url := "http://"+addr+"/get"
+	url := "http://" + addr + "/get"
 	_, res, err := lib.HttpGET(lib.NewTrace(), url, a, 1000, nil)
-	fmt.Println("city_id="+string(res))
+	fmt.Println("city_id=" + string(res))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -80,26 +79,26 @@ func TestPost(t *testing.T) {
 	a := url.Values{
 		"city_id": {"12"},
 	}
-	url := "http://"+addr+"/post"
+	url := "http://" + addr + "/post"
 	_, res, err := lib.HttpPOST(lib.NewTrace(), url, a, 1000, nil, "")
-	fmt.Println("city_id="+string(res))
+	fmt.Println("city_id=" + string(res))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 }
 
 //初始化测试用例
-func InitTest()  {
+func SetUp() {
 	initOnce.Do(func() {
-		if err:=lib.Init("../conf/dev/");err!=nil{
+		if err := lib.InitModule("../conf/dev/", []string{"base", "mysql", "redis",}); err != nil {
 			log.Fatal(err)
 		}
 	})
 }
 
 //销毁测试用例
-func DestroyTest()  {
-	//Destroy()
+func TearDown() {
+	//lib.Destroy()
 }
 
 //只运行一次服务器
@@ -129,4 +128,16 @@ func InitTestServer() {
 		}()
 		time.Sleep(time.Second)
 	})
+}
+
+//测试获取配置string
+func TestGetStringConf(t *testing.T) {
+	SetUp()
+	got, err := lib.GetStringConf("base.log.log_level")
+	if err!=nil{
+		t.Fatal(err)
+	}
+	if got!="trace"{
+		t.Fatal("got result error")
+	}
 }

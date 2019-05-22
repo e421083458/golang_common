@@ -1,8 +1,9 @@
 package lib
 
 import (
+	"bytes"
 	"fmt"
-	"github.com/BurntSushi/toml"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -56,8 +57,11 @@ func ParseConfig(path string, conf interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Read config fail, %v", err)
 	}
-	//注意这里只需要传值即可
-	if _, err := toml.Decode(string(data), conf); err != nil {
+
+	v:=viper.New()
+	v.SetConfigType("toml")
+	v.ReadConfig(bytes.NewBuffer(data))
+	if err:=v.Unmarshal(conf);err!=nil{
 		return fmt.Errorf("Parse config fail, config:%v, err:%v", string(data), err)
 	}
 	return nil

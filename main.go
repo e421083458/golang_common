@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-func main(){
-	if err:=lib.Init("./conf/dev/");err!=nil{
+func main() {
+	if err := lib.InitModule("./conf/dev/",[]string{"base","mysql","redis",}); err != nil {
 		log.Fatal(err)
 	}
 	defer lib.Destroy()

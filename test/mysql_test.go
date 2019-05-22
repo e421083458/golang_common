@@ -35,7 +35,7 @@ var (
 )
 
 func Test_DBPool(t *testing.T) {
-	InitTest()
+	SetUp()
 
 	//获取链接池
 	dbpool, err := lib.GetDBPool("default")
@@ -98,11 +98,11 @@ func Test_DBPool(t *testing.T) {
 
 	//提交事务
 	lib.DBPoolLogQuery(trace, dbpool, commitSQL)
-	DestroyTest()
+	TearDown()
 }
 
 func Test_GORM(t *testing.T) {
-	InitTest()
+	SetUp()
 
 	//获取链接池
 	dbpool, err := lib.GetGormPool("default")
@@ -140,5 +140,5 @@ func Test_GORM(t *testing.T) {
 		t.Fatal(err)
 	}
 	db.Commit()
-	DestroyTest()
+	TearDown()
 }

@@ -11,4 +11,5 @@ require (
 	github.com/jinzhu/now v1.0.0 // indirect
 	github.com/lib/pq v1.1.1 // indirect
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
+	github.com/spf13/viper v1.3.2
 )

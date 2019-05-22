@@ -16,10 +16,14 @@
 go get -v github.com/e421083458/golang_common
 ```
 2. 将配置文件拷贝到你的项目中，配置文件请参考：https://github.com/e421083458/golang_common/tree/master/conf/dev
-其实只需要base.toml即可，mysql.toml、redis.toml 根据实际需要再配置。
+可以通过 InitModule("配置地址","模块数组") 方法按模块需加载配置。
+
+- base：包含日志和系统时间配置等
+- mysql：包含mysql操作方法和日志
+- redis：包含redis操作方法和日志
 
 
-4. log消息打印代码举例：
+3. log消息打印代码举例：
 ```
 package main
 
@@ -29,8 +33,8 @@ import (
 	"time"
 )
 
-func main(){
-	if err:=lib.Init("./conf/dev/");err!=nil{
+func main() {
+	if err := lib.InitModule("./conf/dev/",[]string{"base","mysql","redis",}); err != nil {
 		log.Fatal(err)
 	}
 	defer lib.Destroy()
@@ -66,7 +70,7 @@ go run main.go
 
 ```
 //初始化测试用例
-func InitTest()  {
+func SetUp()  {
 	initOnce.Do(func() {
 		if err:=lib.Init("../conf/dev/");err!=nil{
 			log.Fatal(err)
@@ -80,9 +84,9 @@ func InitTest()  {
 ```
 //获取 程序运行环境 dev prod
 func Test_GetConfEnv(t *testing.T) {
-	InitTest()
+	SetUp()
 	fmt.Println(lib.GetConfEnv())
-	DestroyTest()
+	TearDown()
 }
 ```
 
@@ -98,14 +102,14 @@ type HttpConf struct {
 }
 // 加载自定义配置文件
 func Test_ParseLocalConfig(t *testing.T) {
-	InitTest()
+	SetUp()
 	httpProfile := &HttpConf{}
 	err:=lib.ParseLocalConfig("http.toml",httpProfile)
 	if err!=nil{
 		t.Fatal(err)
 	}
 	fmt.Println(httpProfile)
-	DestroyTest()
+	TearDown()
 }
 ```
 
@@ -114,7 +118,7 @@ func Test_ParseLocalConfig(t *testing.T) {
 ```
 //测试PostJson请求
 func TestJson(t *testing.T) {
-	InitTestServer()
+	SetUpServer()
 	//首次scrollsId不传递
 	jsonStr := "{\"source\":\"control\",\"cityId\":\"12\",\"trailNum\":10,\"dayTime\":\"2018-11-21 16:08:00\",\"limit\":2,\"andOperations\":{\"cityId\":\"eq\",\"trailNum\":\"gt\",\"dayTime\":\"eq\"}}"
 	url := "http://"+addr+"/postjson"
@@ -131,7 +135,7 @@ func TestJson(t *testing.T) {
 ```
 //测试Get请求
 func TestGet(t *testing.T) {
-	InitTestServer()
+	SetUpServer()
 	a := url.Values{
 		"city_id": {"12"},
 	}
@@ -149,7 +153,7 @@ func TestGet(t *testing.T) {
 ```
 //测试Post请求
 func TestPost(t *testing.T) {
-	InitTestServer()
+	SetUpServer()
 	a := url.Values{
 		"city_id": {"12"},
 	}
@@ -167,12 +171,12 @@ func TestPost(t *testing.T) {
 ```
 //测试日志打点
 func TestDefaultLog(t *testing.T) {
-	InitTest()
+	SetUp()
 	lib.Log.TagInfo(lib.NewTrace(), lib.DLTagMySqlSuccess, map[string]interface{}{
 		"sql": "sql",
 	})
 	time.Sleep(time.Second)
-	DestroyTest()
+	TearDown()
 }
 ```
 - 测试自定义日志实例打点
@@ -218,7 +222,7 @@ var (
 )
 
 func Test_DBPool(t *testing.T) {
-	InitTest()
+	SetUp()
 
 	//获取链接池
 	dbpool, err := lib.GetDBPool("default")
@@ -281,7 +285,7 @@ func Test_DBPool(t *testing.T) {
 
 	//提交事务
 	lib.DBPoolLogQuery(trace, dbpool, commitSQL)
-	DestroyTest()
+	TearDown()
 }
 ```
 
@@ -289,7 +293,7 @@ func Test_DBPool(t *testing.T) {
 
 ```
 func Test_GORM(t *testing.T) {
-	InitTest()
+	SetUp()
 
 	//获取链接池
 	dbpool, err := lib.GetGormPool("default")
@@ -327,7 +331,7 @@ func Test_GORM(t *testing.T) {
 		t.Fatal(err)
 	}
 	db.Commit()
-	DestroyTest()
+	TearDown()
 }
 ```
 
@@ -335,7 +339,7 @@ func Test_GORM(t *testing.T) {
 
 ```
 func Test_Redis(t *testing.T) {
-	InitTest()
+	SetUp()
 	
 	c, err := lib.RedisConnFactory("default")
 	if err != nil {
@@ -356,15 +360,32 @@ func Test_Redis(t *testing.T) {
 		t.Fatal("test redis get fatal!")
 	}
 
-	DestroyTest()
+	TearDown()
 }
 ```
+
+
+- 测试获取配置string
+
+```
+func TestGetStringConf(t *testing.T) {
+	SetUp()
+	got, err := lib.GetStringConf("base.log.log_level")
+	if err!=nil{
+		t.Fatal(err)
+	}
+	if got!="trace"{
+		t.Fatal("got result error")
+	}
+}
+```
+
 
 - 销毁当前运行环境
 
 ```
 //销毁测试用例
-func DestroyTest()  {
+func TearDown()  {
 	Destroy()
 }
 ```

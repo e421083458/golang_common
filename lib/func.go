@@ -26,10 +26,14 @@ var LocalIP = net.ParseIP("127.0.0.1")
 
 //公共初始化函数：支持两种方式设置配置文件
 //
-//使用逻辑：
 //函数传入配置文件 Init("./conf/dev/")
 //如果配置文件为空，会从命令行中读取 	  -config conf/dev/
 func Init(configPath string) error {
+	return InitModule(configPath,[]string{"base","mysql","redis"})
+}
+
+//模块初始化
+func InitModule(configPath string,modules []string) error {
 	var conf *string
 	if len(configPath) > 0 {
 		conf = &configPath
@@ -57,19 +61,30 @@ func Init(configPath string) error {
 		return err
 	}
 
-	// 加载base配置
-	if err := InitBaseConf(GetConfPath("base")); err != nil {
+	//初始化配置文件
+	if err := InitViperConf(); err != nil {
 		return err
 	}
 
+	// 加载base配置
+	if InArrayString("base",modules){
+		if err := InitBaseConf(GetConfPath("base")); err != nil {
+			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitBaseConf:"+err.Error())
+		}
+	}
+
 	// 加载redis配置
-	if err := InitRedisConf(GetConfPath("redis_map")); err != nil {
-		fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitRedisConf:"+err.Error())
+	if InArrayString("redis",modules) {
+		if err := InitRedisConf(GetConfPath("redis_map")); err != nil {
+			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitRedisConf:"+err.Error())
+		}
 	}
 
 	// 加载mysql配置并初始化实例
-	if err := InitDBPool(GetConfPath("mysql_map")); err != nil {
-		fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitDBPool:"+err.Error())
+	if InArrayString("mysql",modules) {
+		if err := InitDBPool(GetConfPath("mysql_map")); err != nil {
+			fmt.Printf("[ERROR] %s%s\n", time.Now().Format(TimeFormat), " InitDBPool:"+err.Error())
+		}
 	}
 
 	// 设置时区
@@ -346,4 +361,13 @@ func GetLocalIPs() (ips []net.IP) {
 		}
 	}
 	return ips
+}
+
+func InArrayString(s string,arr []string) bool{
+	for _,i:=range arr{
+		if i==s{
+			return true
+		}
+	}
+	return false
 }

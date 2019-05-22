@@ -1,57 +1,65 @@
 package lib
 
 import (
+	"bytes"
 	"database/sql"
+	"errors"
+	"fmt"
 	dlog "github.com/e421083458/golang_common/log"
 	"github.com/e421083458/gorm"
+	"github.com/spf13/viper"
+	"io/ioutil"
+	"os"
+	"strings"
+	"time"
 )
 
 type BaseConf struct {
-	DebugMode    string    `toml:"debug_mode"`
-	TimeLocation string    `toml:"time_location"`
-	Log          LogConfig `toml:"log"`
+	DebugMode    string    `mapstructure:"debug_mode"`
+	TimeLocation string    `mapstructure:"time_location"`
+	Log          LogConfig `mapstructure:"log"`
 }
 
 type LogConfFileWriter struct {
-	On              bool   `toml:"on"`
-	LogPath         string `toml:"log_path"`
-	RotateLogPath   string `toml:"rotate_log_path"`
-	WfLogPath       string `toml:"wf_log_path"`
-	RotateWfLogPath string `toml:"rotate_wf_path"`
+	On              bool   `mapstructure:"on"`
+	LogPath         string `mapstructure:"log_path"`
+	RotateLogPath   string `mapstructure:"rotate_log_path"`
+	WfLogPath       string `mapstructure:"wf_log_path"`
+	RotateWfLogPath string `mapstructure:"rotate_wf_path"`
 }
 
 type LogConfConsoleWriter struct {
-	On    bool `toml:"on"`
-	Color bool `toml:"color"`
+	On    bool `mapstructure:"on"`
+	Color bool `mapstructure:"color"`
 }
 
 type LogConfig struct {
-	Level string               `toml:"log_level"`
-	FW    LogConfFileWriter    `toml:"file_writer"`
-	CW    LogConfConsoleWriter `toml:"console_writer"`
+	Level string               `mapstructure:"log_level"`
+	FW    LogConfFileWriter    `mapstructure:"file_writer"`
+	CW    LogConfConsoleWriter `mapstructure:"console_writer"`
 }
 
 type MysqlMapConf struct {
-	List map[string]*MySQLConf `toml:"list"`
+	List map[string]*MySQLConf `mapstructure:"list"`
 }
 
 type MySQLConf struct {
-	DriverName      string `toml:"driver_name"`
-	DataSourceName  string `toml:"data_source_name"`
-	MaxOpenConn     int    `toml:"max_open_conn"`
-	MaxIdleConn     int    `toml:"max_idle_conn"`
-	MaxConnLifeTime int    `toml:"max_conn_life_time"`
+	DriverName      string `mapstructure:"driver_name"`
+	DataSourceName  string `mapstructure:"data_source_name"`
+	MaxOpenConn     int    `mapstructure:"max_open_conn"`
+	MaxIdleConn     int    `mapstructure:"max_idle_conn"`
+	MaxConnLifeTime int    `mapstructure:"max_conn_life_time"`
 }
 
 type RedisMapConf struct {
-	List map[string]*RedisConf `toml:"list"`
+	List map[string]*RedisConf `mapstructure:"list"`
 }
 
 type RedisConf struct {
-	ProxyList []string `toml:"proxy_list"`
-	MaxActive int      `toml:"max_active"`
-	MaxIdle   int      `toml:"max_idle"`
-	Downgrade bool     `toml:"down_grade"`
+	ProxyList []string `mapstructure:"proxy_list"`
+	MaxActive int      `mapstructure:"max_active"`
+	MaxIdle   int      `mapstructure:"max_idle"`
+	Downgrade bool     `mapstructure:"down_grade"`
 }
 
 //全局变量
@@ -62,6 +70,7 @@ var DBDefaultPool *sql.DB
 var GORMDefaultPool *gorm.DB
 var ConfRedis *RedisConf
 var ConfRedisMap *RedisMapConf
+var ViperConfMap map[string]*viper.Viper
 
 //获取基本配置信息
 func GetBaseConf() *BaseConf {
@@ -74,6 +83,17 @@ func InitBaseConf(path string) error {
 	if err != nil {
 		return err
 	}
+
+	if ConfBase.DebugMode==""{
+		ConfBase.DebugMode = "debug"
+	}
+	if ConfBase.TimeLocation==""{
+		ConfBase.TimeLocation = "Asia/Chongqing"
+	}
+	if ConfBase.Log.Level==""{
+		ConfBase.Log.Level = "trace"
+	}
+
 	//配置日志
 	logConf := dlog.LogConfig{
 		Level: ConfBase.Log.Level,
@@ -112,4 +132,157 @@ func InitRedisConf(path string) error {
 	}
 	ConfRedisMap = ConfRedis
 	return nil
+}
+
+//初始化配置文件
+func InitViperConf() error {
+	f, err := os.Open(ConfEnvPath + "/")
+	if err != nil {
+		return err
+	}
+	fileList, err := f.Readdir(1024)
+	if err != nil {
+		return err
+	}
+	for _, f0 := range fileList {
+		if !f0.IsDir() {
+			bts, err := ioutil.ReadFile(ConfEnvPath + "/" + f0.Name())
+			if err != nil {
+				return err
+			}
+			v := viper.New()
+			v.SetConfigType("toml")
+			v.ReadConfig(bytes.NewBuffer(bts))
+			pathArr:=strings.Split(f0.Name(),".")
+			if ViperConfMap==nil{
+				ViperConfMap = make(map[string]*viper.Viper)
+			}
+			ViperConfMap[pathArr[0]] = v
+		}
+	}
+	return nil
+}
+
+//获取get配置信息
+func GetStringConf(key string) (string,error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return "",errors.New("key must more 1 .")
+	}
+	v,ok:=ViperConfMap[keys[0]]
+	if !ok{
+		return "",errors.New(fmt.Sprintf("key=%s config not found",keys[0]))
+	}
+	confString:=v.GetString(strings.Join(keys[1:len(keys)],"."))
+	return confString,nil
+}
+
+//获取get配置信息
+func GetStringMapConf(key string) (map[string]interface{},error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return nil,errors.New("key must more 1 .")
+	}
+	v:=ViperConfMap[keys[0]]
+	conf:=v.GetStringMap(strings.Join(keys[1:len(keys)-1],"."))
+	return conf,nil
+}
+
+//获取get配置信息
+func GetConf(key string) (interface{},error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return nil,errors.New("key must more 1 .")
+	}
+	v:=ViperConfMap[keys[0]]
+	conf:=v.Get(strings.Join(keys[1:len(keys)-1],"."))
+	return conf,nil
+}
+
+//获取get配置信息
+func GetBoolConf(key string) (bool,error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return false,errors.New("key must more 1 .")
+	}
+	v:=ViperConfMap[keys[0]]
+	conf:=v.GetBool(strings.Join(keys[1:len(keys)-1],"."))
+	return conf,nil
+}
+
+//获取get配置信息
+func GetFloat64Conf(key string) (float64,error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return 0,errors.New("key must more 1 .")
+	}
+	v:=ViperConfMap[keys[0]]
+	conf:=v.GetFloat64(strings.Join(keys[1:len(keys)-1],"."))
+	return conf,nil
+}
+
+//获取get配置信息
+func GetIntConf(key string) (int,error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return 0,errors.New("key must more 1 .")
+	}
+	v:=ViperConfMap[keys[0]]
+	conf:=v.GetInt(strings.Join(keys[1:len(keys)-1],"."))
+	return conf,nil
+}
+
+//获取get配置信息
+func GetStringMapStringConf(key string) (map[string]string,error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return nil,errors.New("key must more 1 .")
+	}
+	v:=ViperConfMap[keys[0]]
+	conf:=v.GetStringMapString(strings.Join(keys[1:len(keys)-1],"."))
+	return conf,nil
+}
+
+//获取get配置信息
+func GetStringSliceConf(key string) ([]string,error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return nil,errors.New("key must more 1 .")
+	}
+	v:=ViperConfMap[keys[0]]
+	conf:=v.GetStringSlice(strings.Join(keys[1:len(keys)-1],"."))
+	return conf,nil
+}
+
+//获取get配置信息
+func GetTimeConf(key string) (time.Time,error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return time.Now(),errors.New("key must more 1 .")
+	}
+	v:=ViperConfMap[keys[0]]
+	conf:=v.GetTime(strings.Join(keys[1:len(keys)-1],"."))
+	return conf,nil
+}
+
+//获取时间阶段长度
+func GetDurationConf(key string) (time.Duration,error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return 0,errors.New("key must more 1 .")
+	}
+	v:=ViperConfMap[keys[0]]
+	conf:=v.GetDuration(strings.Join(keys[1:len(keys)-1],"."))
+	return conf,nil
+}
+
+//是否设置了key
+func IsSetConf(key string) (bool,error){
+	keys:=strings.Split(key,".")
+	if len(keys)<2{
+		return false,errors.New("key must more 1 .")
+	}
+	v:=ViperConfMap[keys[0]]
+	conf:=v.IsSet(strings.Join(keys[1:len(keys)-1],"."))
+	return conf,nil
 }
