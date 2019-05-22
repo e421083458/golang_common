@@ -20,11 +20,11 @@ var (
 )
 
 type HttpConf struct {
-	ServerAddr     string   `toml:"server_addr"`
-	ReadTimeout    int      `toml:"read_timeout"`
-	WriteTimeout   int      `toml:"write_timeout"`
-	MaxHeaderBytes int      `toml:"max_header_bytes"`
-	AllowHost      []string `toml:"allow_host"`
+	ServerAddr     string   `mapstructure:"server_addr"`
+	ReadTimeout    int      `mapstructure:"read_timeout"`
+	WriteTimeout   int      `mapstructure:"write_timeout"`
+	MaxHeaderBytes int      `mapstructure:"max_header_bytes"`
+	AllowHost      []string `mapstructure:"allow_host"`
 }
 
 //获取 程序运行环境 dev prod
