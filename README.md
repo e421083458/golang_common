@@ -90,6 +90,36 @@ func Test_GetConfEnv(t *testing.T) {
 }
 ```
 
+
+- 以子树的形式获取配置
+
+类似方法有：
+- GetConf(key string) : interface{}
+- GetBoolConf(key string) : bool
+- GetFloat64Conf(key string) : float64
+- GetIntConf(key string) : int
+- GetStringConf(key string) : string
+- GetStringMapConf(key string) : map[string]interface{}
+- GetStringMapStringConf(key string) : map[string]string
+- GetStringSliceConf(key string) : []string
+- GetTimeConf(key string) : time.Time
+- GetDurationConf(key string) : time.Duration
+- IsSetConf(key string) : bool
+
+```
+func TestGetStringConf(t *testing.T) {
+	SetUp()
+	got, err := lib.GetStringConf("base.log.log_level")
+	if err!=nil{
+		t.Fatal(err)
+	}
+	if got!="trace"{
+		t.Fatal("got result error")
+	}
+}
+```
+
+
 - 加载自定义配置文件
 
 ```
@@ -363,23 +393,6 @@ func Test_Redis(t *testing.T) {
 	TearDown()
 }
 ```
-
-
-- 测试获取配置string
-
-```
-func TestGetStringConf(t *testing.T) {
-	SetUp()
-	got, err := lib.GetStringConf("base.log.log_level")
-	if err!=nil{
-		t.Fatal(err)
-	}
-	if got!="trace"{
-		t.Fatal("got result error")
-	}
-}
-```
-
 
 - 销毁当前运行环境
 
