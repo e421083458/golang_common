@@ -109,10 +109,7 @@ func Test_GetConfEnv(t *testing.T) {
 ```
 func TestGetStringConf(t *testing.T) {
 	SetUp()
-	got, err := lib.GetStringConf("base.log.log_level")
-	if err!=nil{
-		t.Fatal(err)
-	}
+	got := lib.GetStringConf("base.log.log_level")
 	if got!="trace"{
 		t.Fatal("got result error")
 	}

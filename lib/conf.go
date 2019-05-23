@@ -3,8 +3,6 @@ package lib
 import (
 	"bytes"
 	"database/sql"
-	"errors"
-	"fmt"
 	dlog "github.com/e421083458/golang_common/log"
 	"github.com/e421083458/gorm"
 	"github.com/spf13/viper"
@@ -164,125 +162,125 @@ func InitViperConf() error {
 }
 
 //获取get配置信息
-func GetStringConf(key string) (string,error){
+func GetStringConf(key string) string{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return "",errors.New("key must more 1 .")
+		return ""
 	}
 	v,ok:=ViperConfMap[keys[0]]
 	if !ok{
-		return "",errors.New(fmt.Sprintf("key=%s config not found",keys[0]))
+		return ""
 	}
 	confString:=v.GetString(strings.Join(keys[1:len(keys)],"."))
-	return confString,nil
+	return confString
 }
 
 //获取get配置信息
-func GetStringMapConf(key string) (map[string]interface{},error){
+func GetStringMapConf(key string) map[string]interface{}{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return nil,errors.New("key must more 1 .")
+		return nil
 	}
 	v:=ViperConfMap[keys[0]]
 	conf:=v.GetStringMap(strings.Join(keys[1:len(keys)-1],"."))
-	return conf,nil
+	return conf
 }
 
 //获取get配置信息
-func GetConf(key string) (interface{},error){
+func GetConf(key string) interface{}{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return nil,errors.New("key must more 1 .")
+		return nil
 	}
 	v:=ViperConfMap[keys[0]]
 	conf:=v.Get(strings.Join(keys[1:len(keys)-1],"."))
-	return conf,nil
+	return conf
 }
 
 //获取get配置信息
-func GetBoolConf(key string) (bool,error){
+func GetBoolConf(key string) bool{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return false,errors.New("key must more 1 .")
+		return false
 	}
 	v:=ViperConfMap[keys[0]]
 	conf:=v.GetBool(strings.Join(keys[1:len(keys)-1],"."))
-	return conf,nil
+	return conf
 }
 
 //获取get配置信息
-func GetFloat64Conf(key string) (float64,error){
+func GetFloat64Conf(key string) float64{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return 0,errors.New("key must more 1 .")
+		return 0
 	}
 	v:=ViperConfMap[keys[0]]
 	conf:=v.GetFloat64(strings.Join(keys[1:len(keys)-1],"."))
-	return conf,nil
+	return conf
 }
 
 //获取get配置信息
-func GetIntConf(key string) (int,error){
+func GetIntConf(key string) int{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return 0,errors.New("key must more 1 .")
+		return 0
 	}
 	v:=ViperConfMap[keys[0]]
 	conf:=v.GetInt(strings.Join(keys[1:len(keys)-1],"."))
-	return conf,nil
+	return conf
 }
 
 //获取get配置信息
-func GetStringMapStringConf(key string) (map[string]string,error){
+func GetStringMapStringConf(key string) map[string]string{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return nil,errors.New("key must more 1 .")
+		return nil
 	}
 	v:=ViperConfMap[keys[0]]
 	conf:=v.GetStringMapString(strings.Join(keys[1:len(keys)-1],"."))
-	return conf,nil
+	return conf
 }
 
 //获取get配置信息
-func GetStringSliceConf(key string) ([]string,error){
+func GetStringSliceConf(key string) []string{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return nil,errors.New("key must more 1 .")
+		return nil
 	}
 	v:=ViperConfMap[keys[0]]
 	conf:=v.GetStringSlice(strings.Join(keys[1:len(keys)-1],"."))
-	return conf,nil
+	return conf
 }
 
 //获取get配置信息
-func GetTimeConf(key string) (time.Time,error){
+func GetTimeConf(key string) time.Time{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return time.Now(),errors.New("key must more 1 .")
+		return time.Now()
 	}
 	v:=ViperConfMap[keys[0]]
 	conf:=v.GetTime(strings.Join(keys[1:len(keys)-1],"."))
-	return conf,nil
+	return conf
 }
 
 //获取时间阶段长度
-func GetDurationConf(key string) (time.Duration,error){
+func GetDurationConf(key string) time.Duration{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return 0,errors.New("key must more 1 .")
+		return 0
 	}
 	v:=ViperConfMap[keys[0]]
 	conf:=v.GetDuration(strings.Join(keys[1:len(keys)-1],"."))
-	return conf,nil
+	return conf
 }
 
 //是否设置了key
-func IsSetConf(key string) (bool,error){
+func IsSetConf(key string) bool{
 	keys:=strings.Split(key,".")
 	if len(keys)<2{
-		return false,errors.New("key must more 1 .")
+		return false
 	}
 	v:=ViperConfMap[keys[0]]
 	conf:=v.IsSet(strings.Join(keys[1:len(keys)-1],"."))
-	return conf,nil
+	return conf
 }
