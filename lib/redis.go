@@ -43,3 +43,37 @@ func RedisLogDo(trace *TraceContext, c redis.Conn, commandName string, args ...i
 	}
 	return reply, err
 }
+
+//通过配置 执行redis
+func RedisConfDo(trace *TraceContext, name string, commandName string, args ...interface{}) (interface{}, error) {
+	c,err:=RedisConnFactory(name)
+	if err!=nil{
+		Log.TagError(trace, "_com_redis_failure", map[string]interface{}{
+			"method":    commandName,
+			"err":       errors.New("RedisConnFactory_error:"+name),
+			"bind":      args,
+		})
+		return nil,err
+	}
+	defer c.Close()
+
+	startExecTime := time.Now()
+	reply, err := c.Do(commandName, args...)
+	endExecTime := time.Now()
+	if err != nil {
+		Log.TagError(trace, "_com_redis_failure", map[string]interface{}{
+			"method":    commandName,
+			"err":       err,
+			"bind":      args,
+			"proc_time": fmt.Sprintf("%fms", endExecTime.Sub(startExecTime).Seconds()),
+		})
+	} else {
+		Log.TagInfo(trace, "_com_redis_success", map[string]interface{}{
+			"method":    commandName,
+			"bind":      args,
+			"reply":     reply,
+			"proc_time": fmt.Sprintf("%fms", endExecTime.Sub(startExecTime).Seconds()),
+		})
+	}
+	return reply, err
+}
