@@ -4,5 +4,5 @@ import:
   version: v1.3.0
 - package: github.com/garyburd/redigo
   version: v1.6.0
-- package: github.com/jinzhu/gorm
-  version: v1.9.1
+- package: github.com/e421083458/gorm
+  version: v1.0.1

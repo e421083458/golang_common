@@ -125,14 +125,14 @@ func InitBaseConf(path string) error {
 	dlog.SetLayout("2006-01-02T15:04:05.000")
 	return nil
 }
-
-func InitLogger(path string) error {
-	if err := dlog.SetupDefaultLogWithFile(path); err != nil {
-		panic(err)
-	}
-	dlog.SetLayout("2006-01-02T15:04:05.000")
-	return nil
-}
+//
+//func InitLogger(path string) error {
+//	if err := dlog.SetupDefaultLogWithFile(path); err != nil {
+//		panic(err)
+//	}
+//	dlog.SetLayout("2006-01-02T15:04:05.000")
+//	return nil
+//}
 
 func InitRedisConf(path string) error {
 	ConfRedis := &RedisMapConf{}

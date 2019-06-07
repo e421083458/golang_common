@@ -2,8 +2,6 @@ package log
 
 import (
 	"errors"
-	"github.com/BurntSushi/toml"
-	"io/ioutil"
 )
 
 type ConfFileWriter struct {
@@ -78,20 +76,6 @@ func SetupLogInstanceWithConf(lc LogConfig, logger *Logger) (err error) {
 		err = errors.New("Invalid log level")
 	}
 	return
-}
-
-func SetupLogInstanceWithFile(file string, logger *Logger) (err error) {
-	var lc LogConfig
-	cnt, err := ioutil.ReadFile(file)
-	if _, err := toml.Decode(string(cnt), &lc); err != nil {
-		return err
-	}
-	return SetupLogInstanceWithConf(lc, logger)
-}
-
-func SetupDefaultLogWithFile(file string) (err error) {
-	defaultLoggerInit()
-	return SetupLogInstanceWithFile(file, logger_default)
 }
 
 func SetupDefaultLogWithConf(lc LogConfig) (err error) {
