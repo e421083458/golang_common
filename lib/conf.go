@@ -16,6 +16,10 @@ type BaseConf struct {
 	DebugMode    string    `mapstructure:"debug_mode"`
 	TimeLocation string    `mapstructure:"time_location"`
 	Log          LogConfig `mapstructure:"log"`
+	Base         struct {
+		DebugMode    string `mapstructure:"debug_mode"`
+		TimeLocation string `mapstructure:"time_location"`
+	} `mapstructure:"base"`
 }
 
 type LogConfFileWriter struct {
@@ -82,13 +86,21 @@ func InitBaseConf(path string) error {
 		return err
 	}
 
-	if ConfBase.DebugMode==""{
-		ConfBase.DebugMode = "debug"
+	if ConfBase.DebugMode == "" {
+		if ConfBase.Base.DebugMode!=""{
+			ConfBase.DebugMode = ConfBase.Base.DebugMode
+		}else{
+			ConfBase.DebugMode = "debug"
+		}
 	}
-	if ConfBase.TimeLocation==""{
-		ConfBase.TimeLocation = "Asia/Chongqing"
+	if ConfBase.TimeLocation == "" {
+		if ConfBase.Base.TimeLocation!=""{
+			ConfBase.TimeLocation = ConfBase.Base.TimeLocation
+		}else{
+			ConfBase.TimeLocation = "Asia/Chongqing"
+		}
 	}
-	if ConfBase.Log.Level==""{
+	if ConfBase.Log.Level == "" {
 		ConfBase.Log.Level = "trace"
 	}
 
@@ -151,8 +163,8 @@ func InitViperConf() error {
 			v := viper.New()
 			v.SetConfigType("toml")
 			v.ReadConfig(bytes.NewBuffer(bts))
-			pathArr:=strings.Split(f0.Name(),".")
-			if ViperConfMap==nil{
+			pathArr := strings.Split(f0.Name(), ".")
+			if ViperConfMap == nil {
 				ViperConfMap = make(map[string]*viper.Viper)
 			}
 			ViperConfMap[pathArr[0]] = v
@@ -162,125 +174,125 @@ func InitViperConf() error {
 }
 
 //获取get配置信息
-func GetStringConf(key string) string{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func GetStringConf(key string) string {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return ""
 	}
-	v,ok:=ViperConfMap[keys[0]]
-	if !ok{
+	v, ok := ViperConfMap[keys[0]]
+	if !ok {
 		return ""
 	}
-	confString:=v.GetString(strings.Join(keys[1:len(keys)],"."))
+	confString := v.GetString(strings.Join(keys[1:len(keys)], "."))
 	return confString
 }
 
 //获取get配置信息
-func GetStringMapConf(key string) map[string]interface{}{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func GetStringMapConf(key string) map[string]interface{} {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return nil
 	}
-	v:=ViperConfMap[keys[0]]
-	conf:=v.GetStringMap(strings.Join(keys[1:len(keys)],"."))
+	v := ViperConfMap[keys[0]]
+	conf := v.GetStringMap(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }
 
 //获取get配置信息
-func GetConf(key string) interface{}{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func GetConf(key string) interface{} {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return nil
 	}
-	v:=ViperConfMap[keys[0]]
-	conf:=v.Get(strings.Join(keys[1:len(keys)],"."))
+	v := ViperConfMap[keys[0]]
+	conf := v.Get(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }
 
 //获取get配置信息
-func GetBoolConf(key string) bool{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func GetBoolConf(key string) bool {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return false
 	}
-	v:=ViperConfMap[keys[0]]
-	conf:=v.GetBool(strings.Join(keys[1:len(keys)],"."))
+	v := ViperConfMap[keys[0]]
+	conf := v.GetBool(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }
 
 //获取get配置信息
-func GetFloat64Conf(key string) float64{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func GetFloat64Conf(key string) float64 {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return 0
 	}
-	v:=ViperConfMap[keys[0]]
-	conf:=v.GetFloat64(strings.Join(keys[1:len(keys)],"."))
+	v := ViperConfMap[keys[0]]
+	conf := v.GetFloat64(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }
 
 //获取get配置信息
-func GetIntConf(key string) int{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func GetIntConf(key string) int {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return 0
 	}
-	v:=ViperConfMap[keys[0]]
-	conf:=v.GetInt(strings.Join(keys[1:len(keys)],"."))
+	v := ViperConfMap[keys[0]]
+	conf := v.GetInt(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }
 
 //获取get配置信息
-func GetStringMapStringConf(key string) map[string]string{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func GetStringMapStringConf(key string) map[string]string {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return nil
 	}
-	v:=ViperConfMap[keys[0]]
-	conf:=v.GetStringMapString(strings.Join(keys[1:len(keys)],"."))
+	v := ViperConfMap[keys[0]]
+	conf := v.GetStringMapString(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }
 
 //获取get配置信息
-func GetStringSliceConf(key string) []string{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func GetStringSliceConf(key string) []string {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return nil
 	}
-	v:=ViperConfMap[keys[0]]
-	conf:=v.GetStringSlice(strings.Join(keys[1:len(keys)],"."))
+	v := ViperConfMap[keys[0]]
+	conf := v.GetStringSlice(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }
 
 //获取get配置信息
-func GetTimeConf(key string) time.Time{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func GetTimeConf(key string) time.Time {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return time.Now()
 	}
-	v:=ViperConfMap[keys[0]]
-	conf:=v.GetTime(strings.Join(keys[1:len(keys)],"."))
+	v := ViperConfMap[keys[0]]
+	conf := v.GetTime(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }
 
 //获取时间阶段长度
-func GetDurationConf(key string) time.Duration{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func GetDurationConf(key string) time.Duration {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return 0
 	}
-	v:=ViperConfMap[keys[0]]
-	conf:=v.GetDuration(strings.Join(keys[1:len(keys)],"."))
+	v := ViperConfMap[keys[0]]
+	conf := v.GetDuration(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }
 
 //是否设置了key
-func IsSetConf(key string) bool{
-	keys:=strings.Split(key,".")
-	if len(keys)<2{
+func IsSetConf(key string) bool {
+	keys := strings.Split(key, ".")
+	if len(keys) < 2 {
 		return false
 	}
-	v:=ViperConfMap[keys[0]]
-	conf:=v.IsSet(strings.Join(keys[1:len(keys)],"."))
+	v := ViperConfMap[keys[0]]
+	conf := v.IsSet(strings.Join(keys[1:len(keys)], "."))
 	return conf
 }

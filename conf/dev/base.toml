@@ -1,7 +1,8 @@
 # This is base config
 
-debug_mode="debug"              #debug模式
-time_location="Asia/Chongqing"  #time_location
+[base]
+    debug_mode="debug"
+    time_location="Asia/Chongqing"
 
 [log]
     log_level = "trace"         #日志打印最低级别
