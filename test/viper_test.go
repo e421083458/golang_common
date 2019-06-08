@@ -33,6 +33,7 @@ beard: true
 	if err:=viper.Unmarshal(&yt);err!=nil{
 		t.Fatal(err)
 	}
+	viper.WriteConfigAs("viper.toml")
 	fmt.Println()
 	fmt.Println(yt)
 	fmt.Println(viper.Get("name")) // this would be "steve"
