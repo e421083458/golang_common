@@ -35,9 +35,11 @@ func RedisLogDo(trace *TraceContext, c redis.Conn, commandName string, args ...i
 			"proc_time": fmt.Sprintf("%fms", endExecTime.Sub(startExecTime).Seconds()),
 		})
 	} else {
+		replyStr,_:=redis.String(reply,nil)
 		Log.TagInfo(trace, "_com_redis_success", map[string]interface{}{
 			"method":    commandName,
 			"bind":      args,
+			"reply":     replyStr,
 			"proc_time": fmt.Sprintf("%fms", endExecTime.Sub(startExecTime).Seconds()),
 		})
 	}
@@ -68,10 +70,11 @@ func RedisConfDo(trace *TraceContext, name string, commandName string, args ...i
 			"proc_time": fmt.Sprintf("%fms", endExecTime.Sub(startExecTime).Seconds()),
 		})
 	} else {
+		replyStr,_:=redis.String(reply,nil)
 		Log.TagInfo(trace, "_com_redis_success", map[string]interface{}{
 			"method":    commandName,
 			"bind":      args,
-			"reply":     reply,
+			"reply":     replyStr,
 			"proc_time": fmt.Sprintf("%fms", endExecTime.Sub(startExecTime).Seconds()),
 		})
 	}
