@@ -161,7 +161,7 @@ func (logger *MysqlGormLogger) LogFormatter(values ...interface{}) (messages map
 		if level == "sql" {
 			// duration
 			//messages = append(messages, fmt.Sprintf("%.2fms", float64(values[2].(time.Duration).Nanoseconds() / 1e4) / 100.0))
-			messages["proc_time"] = fmt.Sprintf("%.9f", float64(values[2].(time.Duration).Nanoseconds()/1e9))
+			messages["proc_time"] = fmt.Sprintf("%fs", values[2].(time.Duration).Seconds())
 			// sql
 
 			for _, value := range values[4].([]interface{}) {

@@ -32,7 +32,7 @@ func RedisLogDo(trace *TraceContext, c redis.Conn, commandName string, args ...i
 			"method":    commandName,
 			"err":       err,
 			"bind":      args,
-			"proc_time": fmt.Sprintf("%fms", endExecTime.Sub(startExecTime).Seconds()),
+			"proc_time": fmt.Sprintf("%fs", endExecTime.Sub(startExecTime).Seconds()),
 		})
 	} else {
 		replyStr,_:=redis.String(reply,nil)
@@ -40,7 +40,7 @@ func RedisLogDo(trace *TraceContext, c redis.Conn, commandName string, args ...i
 			"method":    commandName,
 			"bind":      args,
 			"reply":     replyStr,
-			"proc_time": fmt.Sprintf("%fms", endExecTime.Sub(startExecTime).Seconds()),
+			"proc_time": fmt.Sprintf("%fs", endExecTime.Sub(startExecTime).Seconds()),
 		})
 	}
 	return reply, err
@@ -67,7 +67,7 @@ func RedisConfDo(trace *TraceContext, name string, commandName string, args ...i
 			"method":    commandName,
 			"err":       err,
 			"bind":      args,
-			"proc_time": fmt.Sprintf("%fms", endExecTime.Sub(startExecTime).Seconds()),
+			"proc_time": fmt.Sprintf("%fs", endExecTime.Sub(startExecTime).Seconds()),
 		})
 	} else {
 		replyStr,_:=redis.String(reply,nil)
@@ -75,7 +75,7 @@ func RedisConfDo(trace *TraceContext, name string, commandName string, args ...i
 			"method":    commandName,
 			"bind":      args,
 			"reply":     replyStr,
-			"proc_time": fmt.Sprintf("%fms", endExecTime.Sub(startExecTime).Seconds()),
+			"proc_time": fmt.Sprintf("%fs", endExecTime.Sub(startExecTime).Seconds()),
 		})
 	}
 	return reply, err

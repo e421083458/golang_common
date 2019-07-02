@@ -28,6 +28,5 @@ func Test_Redis(t *testing.T) {
 	if v != "test_dpool" || err != nil {
 		t.Fatal("test redis get fatal!")
 	}
-
-	TearDown()
+	TearDown() 
 }
