@@ -58,10 +58,10 @@ type RedisMapConf struct {
 }
 
 type RedisConf struct {
-	ProxyList []string `mapstructure:"proxy_list"`
-	MaxActive int      `mapstructure:"max_active"`
-	MaxIdle   int      `mapstructure:"max_idle"`
-	Downgrade bool     `mapstructure:"down_grade"`
+	ProxyList    []string `mapstructure:"proxy_list"`
+	ConnTimeout  int      `mapstructure:"conn_timeout"`
+	ReadTimeout  int      `mapstructure:"read_timeout"`
+	WriteTimeout int      `mapstructure:"write_timeout"`
 }
 
 //全局变量
@@ -87,16 +87,16 @@ func InitBaseConf(path string) error {
 	}
 
 	if ConfBase.DebugMode == "" {
-		if ConfBase.Base.DebugMode!=""{
+		if ConfBase.Base.DebugMode != "" {
 			ConfBase.DebugMode = ConfBase.Base.DebugMode
-		}else{
+		} else {
 			ConfBase.DebugMode = "debug"
 		}
 	}
 	if ConfBase.TimeLocation == "" {
-		if ConfBase.Base.TimeLocation!=""{
+		if ConfBase.Base.TimeLocation != "" {
 			ConfBase.TimeLocation = ConfBase.Base.TimeLocation
-		}else{
+		} else {
 			ConfBase.TimeLocation = "Asia/Chongqing"
 		}
 	}
@@ -125,6 +125,7 @@ func InitBaseConf(path string) error {
 	dlog.SetLayout("2006-01-02T15:04:05.000")
 	return nil
 }
+
 //
 //func InitLogger(path string) error {
 //	if err := dlog.SetupDefaultLogWithFile(path); err != nil {

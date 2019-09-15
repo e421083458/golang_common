@@ -2,6 +2,6 @@
 [list]
     [list.default]
         proxy_list = ["127.0.0.1:6379"]
-        max_active = 100
-        max_idle = 100
-        down_grade = false
+        conn_timeout = 50
+        read_timeout = 100
+        write_timeout = 100
