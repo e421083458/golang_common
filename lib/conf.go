@@ -27,7 +27,7 @@ type LogConfFileWriter struct {
 	LogPath         string `mapstructure:"log_path"`
 	RotateLogPath   string `mapstructure:"rotate_log_path"`
 	WfLogPath       string `mapstructure:"wf_log_path"`
-	RotateWfLogPath string `mapstructure:"rotate_wf_path"`
+	RotateWfLogPath string `mapstructure:"rotate_wf_log_path"`
 }
 
 type LogConfConsoleWriter struct {

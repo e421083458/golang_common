@@ -13,4 +13,3 @@ require (
 	github.com/spf13/viper v1.4.0
 	google.golang.org/appengine v1.6.0 // indirect
 )
-
