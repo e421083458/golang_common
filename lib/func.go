@@ -40,7 +40,7 @@ func InitModule(configPath string,modules []string) error {
 		flag.Usage()
 		os.Exit(1)
 	}
-	
+
 	log.Println("------------------------------------------------------------------------")
 	log.Printf("[INFO]  config=%s\n", *conf)
 	log.Printf("[INFO] %s\n", " start loading resources.")
@@ -264,10 +264,10 @@ func addTrace2Header(request *http.Request, trace *TraceContext) *http.Request {
 	traceId := trace.TraceId
 	cSpanId := NewSpanId()
 	if traceId != "" {
-		request.Header.Set("header-rid", traceId)
+		request.Header.Set("didi-header-rid", traceId)
 	}
 	if cSpanId != "" {
-		request.Header.Set("header-spanid", cSpanId)
+		request.Header.Set("didi-header-spanid", cSpanId)
 	}
 	trace.CSpanId = cSpanId
 	return request
