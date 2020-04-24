@@ -1,3 +1,28 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [定位](#%E5%AE%9A%E4%BD%8D)
+- [功能](#%E5%8A%9F%E8%83%BD)
+- [安装及使用](#%E5%AE%89%E8%A3%85%E5%8F%8A%E4%BD%BF%E7%94%A8)
+- [其他功能举例](#%E5%85%B6%E4%BB%96%E5%8A%9F%E8%83%BD%E4%B8%BE%E4%BE%8B)
+  - [初始化当前运行环境](#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%BD%93%E5%89%8D%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83)
+  - [获取当前运行环境](#%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83)
+  - [以子树的形式获取配置](#%E4%BB%A5%E5%AD%90%E6%A0%91%E7%9A%84%E5%BD%A2%E5%BC%8F%E8%8E%B7%E5%8F%96%E9%85%8D%E7%BD%AE)
+  - [加载自定义配置文件](#%E5%8A%A0%E8%BD%BD%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6)
+  - [测试PostJson请求](#%E6%B5%8B%E8%AF%95postjson%E8%AF%B7%E6%B1%82)
+  - [测试Get请求](#%E6%B5%8B%E8%AF%95get%E8%AF%B7%E6%B1%82)
+  - [测试Post请求](#%E6%B5%8B%E8%AF%95post%E8%AF%B7%E6%B1%82)
+  - [测试默认日志打点](#%E6%B5%8B%E8%AF%95%E9%BB%98%E8%AE%A4%E6%97%A5%E5%BF%97%E6%89%93%E7%82%B9)
+  - [测试自定义日志实例打点](#%E6%B5%8B%E8%AF%95%E8%87%AA%E5%AE%9A%E4%B9%89%E6%97%A5%E5%BF%97%E5%AE%9E%E4%BE%8B%E6%89%93%E7%82%B9)
+  - [测试mysql普通sql](#%E6%B5%8B%E8%AF%95mysql%E6%99%AE%E9%80%9Asql)
+  - [测试Gorm](#%E6%B5%8B%E8%AF%95gorm)
+  - [测试redis查询](#%E6%B5%8B%E8%AF%95redis%E6%9F%A5%E8%AF%A2)
+  - [销毁当前运行环境](#%E9%94%80%E6%AF%81%E5%BD%93%E5%89%8D%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83)
+- [思考](#%E6%80%9D%E8%80%83)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 ## 定位
 配置 Golang 基础服务（mysql、redis、http.client、log）比较繁琐，如果想 **快速接入** 基础服务可以使用本类库。
@@ -66,7 +91,7 @@ go run main.go
 
 ## 其他功能举例
 
-- 初始化当前运行环境
+### 初始化当前运行环境
 
 ```
 //初始化测试用例
@@ -79,7 +104,7 @@ func SetUp()  {
 }
 ```
 
-- 获取当前运行环境
+### 获取当前运行环境
 
 ```
 //获取 程序运行环境 dev prod
@@ -91,7 +116,7 @@ func Test_GetConfEnv(t *testing.T) {
 ```
 
 
-- 以子树的形式获取配置
+### 以子树的形式获取配置
 
 类似方法有：
 - GetConf(key string) : interface{}
@@ -117,7 +142,7 @@ func TestGetStringConf(t *testing.T) {
 ```
 
 
-- 加载自定义配置文件
+### 加载自定义配置文件
 
 ```
 type HttpConf struct {
@@ -140,7 +165,7 @@ func Test_ParseLocalConfig(t *testing.T) {
 }
 ```
 
-- 测试PostJson请求
+### 测试PostJson请求
 
 ```
 //测试PostJson请求
@@ -157,7 +182,7 @@ func TestJson(t *testing.T) {
 }
 ```
 
-- 测试Get请求
+### 测试Get请求
 
 ```
 //测试Get请求
@@ -175,7 +200,7 @@ func TestGet(t *testing.T) {
 }
 ```
 
-- 测试Post请求
+### 测试Post请求
 
 ```
 //测试Post请求
@@ -193,7 +218,7 @@ func TestPost(t *testing.T) {
 }
 ```
 
-- 测试默认日志打点
+### 测试默认日志打点
 
 ```
 //测试日志打点
@@ -206,7 +231,7 @@ func TestDefaultLog(t *testing.T) {
 	TearDown()
 }
 ```
-- 测试自定义日志实例打点
+### 测试自定义日志实例打点
 
 ```
 //测试日志实例打点
@@ -233,7 +258,7 @@ func TestLogInstance(t *testing.T) {
 }
 ```
 
-- 测试mysql普通sql
+### 测试mysql普通sql
 
 ```
 var (
@@ -316,7 +341,7 @@ func Test_DBPool(t *testing.T) {
 }
 ```
 
-- 测试Gorm
+### 测试Gorm
 
 ```
 func Test_GORM(t *testing.T) {
@@ -362,7 +387,7 @@ func Test_GORM(t *testing.T) {
 }
 ```
 
-- 测试redis查询
+### 测试redis查询
 
 ```
 func Test_Redis(t *testing.T) {
@@ -391,7 +416,7 @@ func Test_Redis(t *testing.T) {
 }
 ```
 
-- 销毁当前运行环境
+### 销毁当前运行环境
 
 ```
 //销毁测试用例
