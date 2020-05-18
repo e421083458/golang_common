@@ -59,6 +59,8 @@ type RedisMapConf struct {
 
 type RedisConf struct {
 	ProxyList    []string `mapstructure:"proxy_list"`
+	Password     string   `mapstructure:"password"`
+	Db           int      `mapstructure:"db"`
 	ConnTimeout  int      `mapstructure:"conn_timeout"`
 	ReadTimeout  int      `mapstructure:"read_timeout"`
 	WriteTimeout int      `mapstructure:"write_timeout"`

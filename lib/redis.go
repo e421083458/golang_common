@@ -22,12 +22,28 @@ func RedisConnFactory(name string) (redis.Conn, error) {
 				if cfg.WriteTimeout == 0 {
 					cfg.WriteTimeout = 100
 				}
-				return redis.Dial(
+				c, err := redis.Dial(
 					"tcp",
 					randHost,
 					redis.DialConnectTimeout(time.Duration(cfg.ConnTimeout)*time.Millisecond),
 					redis.DialReadTimeout(time.Duration(cfg.ReadTimeout)*time.Millisecond),
 					redis.DialWriteTimeout(time.Duration(cfg.WriteTimeout)*time.Millisecond))
+				if err != nil {
+					return nil, err
+				}
+				if cfg.Password != "" {
+					if _, err := c.Do("AUTH", cfg.Password); err != nil {
+						c.Close()
+						return nil, err
+					}
+				}
+				if cfg.Db != 0 {
+					if _, err := c.Do("SELECT", cfg.Db); err != nil {
+						c.Close()
+						return nil, err
+					}
+				}
+				return c, nil
 			}
 		}
 	}
