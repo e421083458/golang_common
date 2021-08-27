@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"golang_common/lib"
+	"github.com/chenliang188/golang_common/lib"
 	"github.com/garyburd/redigo/redis"
 	"testing"
 )

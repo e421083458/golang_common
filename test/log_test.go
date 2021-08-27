@@ -1,8 +1,8 @@
 package test
 
 import (
-	"golang_common/lib"
-	"golang_common/log"
+	"github.com/chenliang188/golang_common/lib"
+	"github.com/chenliang188/golang_common/log"
 	"testing"
 	"time"
 )

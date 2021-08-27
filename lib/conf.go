@@ -3,7 +3,7 @@ package lib
 import (
 	"bytes"
 	"database/sql"
-	dlog "golang_common/log"
+	dlog "github.com/chenliang188/golang_common/log"
 	"github.com/e421083458/gorm"
 	"github.com/spf13/viper"
 	"io/ioutil"

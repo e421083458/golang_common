@@ -3,7 +3,7 @@ package test
 import (
 	"bytes"
 	"fmt"
-	"golang_common/lib"
+	"github.com/chenliang188/golang_common/lib"
 	"io/ioutil"
 	"log"
 	"net/http"
