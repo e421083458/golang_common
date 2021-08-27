@@ -1,4 +1,4 @@
-module golang_common
+module github.com/chenliang188/golang_common
 
 require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20190515213511-eb9f6a1743f3 // indirect
