@@ -1,9 +1,10 @@
 package test
 
 import (
+	"context"
 	"fmt"
 	"github.com/e421083458/golang_common/lib"
-	"github.com/e421083458/gorm"
+	"gorm.io/gorm"
 	"testing"
 	"time"
 )
@@ -111,9 +112,10 @@ func Test_GORM(t *testing.T) {
 	}
 	db := dbpool.Begin()
 	traceCtx := lib.NewTrace()
-
+	ctx := context.Background()
+	ctx = lib.SetTraceContext(ctx, traceCtx)
 	//设置trace信息
-	db = db.SetCtx(traceCtx)
+	db = db.WithContext(ctx)
 	if err := db.Exec(createTableSQL).Error; err != nil {
 		db.Rollback()
 		t.Fatal(err)
