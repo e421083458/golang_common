@@ -20,7 +20,7 @@ type TraceContext struct {
 	CSpanId string
 }
 
-func SetGinTraceContext(c *gin.Context,trace *TraceContext) error {
+func SetGinTraceContext(c *gin.Context, trace *TraceContext) error {
 	if trace == nil || c == nil {
 		return errors.New("context is nil")
 	}
@@ -36,8 +36,8 @@ func SetTraceContext(ctx context.Context, trace *TraceContext) context.Context {
 }
 
 func GetTraceContext(ctx context.Context) *TraceContext {
-	if ginCtx, ok := ctx.(*gin.Context) ; ok {
-		traceIntraceContext,exists := ginCtx.Get("trace")
+	if ginCtx, ok := ctx.(*gin.Context); ok {
+		traceIntraceContext, exists := ginCtx.Get("trace")
 		if !exists {
 			return NewTrace()
 		}
@@ -49,7 +49,7 @@ func GetTraceContext(ctx context.Context) *TraceContext {
 	}
 
 	if contextInterface, ok := ctx.(context.Context); ok {
-		traceContext ,ok := contextInterface.Value("trace").(*TraceContext)
+		traceContext, ok := contextInterface.Value("trace").(*TraceContext)
 		if ok {
 			return traceContext
 		}
