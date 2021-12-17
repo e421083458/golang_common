@@ -4,7 +4,6 @@ go 1.16
 
 require (
 	github.com/denisenkom/go-mssqldb v0.0.0-20190515213511-eb9f6a1743f3 // indirect
-	github.com/e421083458/gorm v1.0.1
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/garyburd/redigo v1.6.0
 	github.com/gin-gonic/gin v1.7.7

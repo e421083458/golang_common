@@ -1,8 +1,0 @@
-package: github.com/e421083458/golang_common
-import:
-- package: github.com/go-sql-driver/mysql
-  version: v1.3.0
-- package: github.com/garyburd/redigo
-  version: v1.6.0
-- package: github.com/e421083458/gorm
-  version: v1.0.1

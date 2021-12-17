@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"database/sql"
 	dlog "github.com/e421083458/golang_common/log"
-	//"github.com/e421083458/gorm"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 	"io/ioutil"
