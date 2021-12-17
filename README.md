@@ -34,7 +34,7 @@
  1. 多套配置环境设置，比如：dev、prod。
  2. mysql、redis 多套数据源配置。
  3. 支持默认和自定义日志实例，自动滚动日志。
- 4. 支持 mysql(基于gorm的二次开发支持ctx功能，不影响gorm原功能使用)、redis(redigo)、http.client 请求链路日志输出。
+ 4. 支持 mysql(gorm.io/gorm v1.22.4)、redis(redigo)、http.client 请求链路日志输出。
 ## 安装及使用
  1. 需要确保已经安装了 Go 1.8+，然后执行以下命令
 ```

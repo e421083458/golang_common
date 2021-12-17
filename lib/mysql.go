@@ -1,17 +1,16 @@
 package lib
 
 import (
+	"context"
 	"database/sql"
-	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/e421083458/gorm"
-	_ "github.com/e421083458/gorm/dialects/mysql"
-	"reflect"
-	"regexp"
-	"strconv"
+	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/gorm/utils"
 	"time"
-	"unicode"
 )
 
 func InitDBPool(path string) error {
@@ -41,23 +40,14 @@ func InitDBPool(path string) error {
 		}
 
 		//gorm连接方式
-		dbgorm, err := gorm.Open("mysql", DbConf.DataSourceName)
+		dbGorm, err := gorm.Open(mysql.New(mysql.Config{Conn: dbpool}), &gorm.Config{
+			Logger: &DefaultMysqlGormLogger,
+		})
 		if err != nil {
 			return err
 		}
-		dbgorm.SingularTable(true)
-		err = dbgorm.DB().Ping()
-		if err != nil {
-			return err
-		}
-		dbgorm.LogMode(true)
-		dbgorm.LogCtx(true)
-		dbgorm.SetLogger(&MysqlGormLogger{Trace: NewTrace()})
-		dbgorm.DB().SetMaxIdleConns(DbConf.MaxIdleConn)
-		dbgorm.DB().SetMaxOpenConns(DbConf.MaxOpenConn)
-		dbgorm.DB().SetConnMaxLifetime(time.Duration(DbConf.MaxConnLifeTime) * time.Second)
 		DBMapPool[confName] = dbpool
-		GORMMapPool[confName] = dbgorm
+		GORMMapPool[confName] = dbGorm
 	}
 
 	//手动配置连接
@@ -88,9 +78,8 @@ func CloseDB() error {
 	for _, dbpool := range DBMapPool {
 		dbpool.Close()
 	}
-	for _, dbpool := range GORMMapPool {
-		dbpool.Close()
-	}
+	DBMapPool = make(map[string]*sql.DB)
+	GORMMapPool = make(map[string]*gorm.DB)
 	return nil
 }
 
@@ -114,119 +103,84 @@ func DBPoolLogQuery(trace *TraceContext, sqlDb *sql.DB, query string, args ...in
 	return rows, err
 }
 
-//mysql日志打印类
-// Logger default logger
+//mysql 日志打印类型
+var DefaultMysqlGormLogger = MysqlGormLogger{
+	LogLevel:logger.Info,
+	SlowThreshold:200 * time.Millisecond,
+}
+
 type MysqlGormLogger struct {
-	gorm.Logger
-	Trace *TraceContext
+	LogLevel      logger.LogLevel
+	SlowThreshold time.Duration
 }
 
-// Print format & print log
-func (logger *MysqlGormLogger) Print(values ...interface{}) {
-	message := logger.LogFormatter(values...)
-	if message["level"] == "sql" {
-		Log.TagInfo(logger.Trace, "_com_mysql_success", message)
-	} else {
-		Log.TagInfo(logger.Trace, "_com_mysql_failure", message)
-	}
+func (mgl *MysqlGormLogger) LogMode(logLevel logger.LogLevel) logger.Interface {
+	mgl.LogLevel = logLevel
+	return mgl
 }
 
-// LogCtx(true) 时会执行改方法
-func (logger *MysqlGormLogger) CtxPrint(s *gorm.DB,values ...interface{}) {
-	ctx,ok:=s.GetCtx()
-	trace:=NewTrace()
-	if ok{
-		trace=ctx.(*TraceContext)
-	}
-	message := logger.LogFormatter(values...)
-	if message["level"] == "sql" {
-		Log.TagInfo(trace, "_com_mysql_success", message)
-	} else {
-		Log.TagInfo(trace, "_com_mysql_failure", message)
-	}
+func (mgl *MysqlGormLogger) Info(ctx context.Context, message string, values ...interface{}) {
+	trace := GetTraceContext(ctx)
+	params := make(map[string]interface{})
+	params["message"] = message
+	params["values"] = fmt.Sprint(values)
+	Log.TagInfo(trace, "_com_mysql_Info", params)
 }
+func (mgl *MysqlGormLogger) Warn(ctx context.Context, message string, values ...interface{}) {
+	trace := GetTraceContext(ctx)
+	params := make(map[string]interface{})
+	params["message"] = message
+	params["values"] = fmt.Sprint(values)
+	Log.TagInfo(trace, "_com_mysql_Warn", params)
+}
+func (mgl *MysqlGormLogger) Error(ctx context.Context, message string, values ...interface{}) {
+	trace := GetTraceContext(ctx)
+	params := make(map[string]interface{})
+	params["message"] = message
+	params["values"] = fmt.Sprint(values)
+	Log.TagInfo(trace, "_com_mysql_Error", params)
+}
+func (mgl *MysqlGormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
+	trace := GetTraceContext(ctx)
 
-func (logger *MysqlGormLogger) LogFormatter(values ...interface{}) (messages map[string]interface{}) {
-	if len(values) > 1 {
-		var (
-			sql             string
-			formattedValues []string
-			level           = values[0]
-			currentTime     = logger.NowFunc().Format("2006-01-02 15:04:05")
-			source          = fmt.Sprintf("%v", values[1])
-		)
+	if mgl.LogLevel <= logger.Silent {
+		return
+	}
 
-		messages = map[string]interface{}{"level": level, "source": source, "current_time": currentTime}
-
-		if level == "sql" {
-			// duration
-			//messages = append(messages, fmt.Sprintf("%.2fms", float64(values[2].(time.Duration).Nanoseconds() / 1e4) / 100.0))
-			messages["proc_time"] = fmt.Sprintf("%fs", values[2].(time.Duration).Seconds())
-			// sql
-
-			for _, value := range values[4].([]interface{}) {
-				indirectValue := reflect.Indirect(reflect.ValueOf(value))
-				if indirectValue.IsValid() {
-					value = indirectValue.Interface()
-					if t, ok := value.(time.Time); ok {
-						formattedValues = append(formattedValues, fmt.Sprintf("'%v'", t.Format("2006-01-02 15:04:05")))
-					} else if b, ok := value.([]byte); ok {
-						if str := string(b); logger.isPrintable(str) {
-							formattedValues = append(formattedValues, fmt.Sprintf("'%v'", str))
-						} else {
-							formattedValues = append(formattedValues, "'<binary>'")
-						}
-					} else if r, ok := value.(driver.Valuer); ok {
-						if value, err := r.Value(); err == nil && value != nil {
-							formattedValues = append(formattedValues, fmt.Sprintf("'%v'", value))
-						} else {
-							formattedValues = append(formattedValues, "NULL")
-						}
-					} else {
-						formattedValues = append(formattedValues, fmt.Sprintf("'%v'", value))
-					}
-				} else {
-					formattedValues = append(formattedValues, "NULL")
-				}
-			}
-
-			// differentiate between $n placeholders or else treat like ?
-			if regexp.MustCompile(`\$\d+`).MatchString(values[3].(string)) {
-				sql = values[3].(string)
-				for index, value := range formattedValues {
-					placeholder := fmt.Sprintf(`\$%d([^\d]|$)`, index+1)
-					sql = regexp.MustCompile(placeholder).ReplaceAllString(sql, value+"$1")
-				}
-			} else {
-				formattedValuesLength := len(formattedValues)
-				for index, value := range regexp.MustCompile(`\?`).Split(values[3].(string), -1) {
-					sql += value
-					if index < formattedValuesLength {
-						sql += formattedValues[index]
-					}
-				}
-			}
-
-			messages["sql"] = sql
-			if len(values) > 5 {
-				messages["affected_row"] = strconv.FormatInt(values[5].(int64), 10)
-			}
+	sqlStr, rows := fc()
+	currentTime := begin.Format(TimeFormat)
+	elapsed := time.Since(begin)
+	msg := map[string]interface{}{
+		"FileWithLineNum": utils.FileWithLineNum(),
+		"sql":             sqlStr,
+		"rows":            "-",
+		"proc_time":       float64(elapsed.Milliseconds()),
+		"current_time":    currentTime,
+	}
+	switch {
+	case err != nil && mgl.LogLevel >= logger.Error && (!errors.Is(err, logger.ErrRecordNotFound)):
+		msg["err"] = err
+		if rows == -1 {
+			Log.TagInfo(trace, "_com_mysql_failure", msg)
 		} else {
-			messages["ext"] = values
+			msg["rows"] = rows
+			Log.TagInfo(trace, "_com_mysql_failure", msg)
+		}
+	case elapsed > mgl.SlowThreshold && mgl.SlowThreshold != 0 && mgl.LogLevel >= logger.Warn:
+		slowLog := fmt.Sprintf("SLOW SQL >= %v", mgl.SlowThreshold)
+		msg["slowLog"] = slowLog
+		if rows == -1 {
+			Log.TagInfo(trace, "_com_mysql_success", msg)
+		} else {
+			msg["rows"] = rows
+			Log.TagInfo(trace, "_com_mysql_success", msg)
+		}
+	case mgl.LogLevel == logger.Info:
+		if rows == -1 {
+			Log.TagInfo(trace, "_com_mysql_success", msg)
+		} else {
+			msg["rows"] = rows
+			Log.TagInfo(trace, "_com_mysql_success", msg)
 		}
 	}
-	return
-}
-
-func (logger *MysqlGormLogger) NowFunc() time.Time {
-	return time.Now()
-}
-
-func (logger *MysqlGormLogger) isPrintable(s string) bool {
-	for _, r := range s {
-		if !unicode.IsPrint(r) {
-			return false
-		}
-	}
-	return true
 }
